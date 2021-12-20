@@ -192,7 +192,14 @@ class NashNN():
         A = - c1_list * (act_list-mu_list)**2 / 2 - c2_list * (act_list-mu_list) * torch.sum(uNeg_list - muNeg_list,
                         dim = 1) - c3_list * torch.sum((uNeg_list - muNeg_list)**2,dim = 1) / 2
 
-        return torch.sum((torch.tensor(np.multiply(np.ones(len(curVal))-isLastState, nextVal) + np.multiply(isLastState, term_list) + reward_list.view(-1)).float()
+        # return torch.sum((torch.tensor(np.multiply(np.ones(len(curVal))-isLastState, nextVal) + np.multiply(isLastState, term_list) + reward_list.view(-1)).float()
+        #                   - curVal - A)**2 
+        #                 + penalty*torch.var(c1_list.view(-1,self.num_players),1).view(-1,1).repeat(1,self.num_players).view(-1)
+        #                 + penalty*torch.var(c2_list.view(-1,self.num_players),1).view(-1,1).repeat(1,self.num_players).view(-1)
+        #                 + penalty*torch.var(c3_list.view(-1,self.num_players),1).view(-1,1).repeat(1,self.num_players).view(-1)).cuda()
+        
+        np_list = np.concatenate( np.multiply(np.ones(len(curVal))-isLastState, nextVal) , np.multiply(isLastState, term_list))
+        return torch.sum((torch.tensor(np_list + reward_list.view(-1)).float()
                           - curVal - A)**2 
                         + penalty*torch.var(c1_list.view(-1,self.num_players),1).view(-1,1).repeat(1,self.num_players).view(-1)
                         + penalty*torch.var(c2_list.view(-1,self.num_players),1).view(-1,1).repeat(1,self.num_players).view(-1)
